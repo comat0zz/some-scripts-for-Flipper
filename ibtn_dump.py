@@ -67,8 +67,12 @@ def dump(dump_path):
     if protocol == 'Cyfral' and data_fuzz:
       ibtnfuzzer['Cyfral'].append(data_fuzz.replace(' ', ''))
 
-    # хз какие имена, пусть будут цифры
-    filename = f"{dump_path}/{protocol}/{index}.ibtn"
+    if 'name' in record:
+      name = record['name']
+    else:
+      name = index
+
+    filename = f"{dump_path}/{protocol}/{name}.ibtn"
     with open(filename, "w") as f:
       f.write(body)
       f.close()
