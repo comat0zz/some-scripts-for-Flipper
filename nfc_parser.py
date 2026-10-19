@@ -33,13 +33,11 @@ def parser_nfc(file_path):
       try:
         payload = tmp[1].strip()
       except:
-        print(file_path)
-        print(tmp)
         continue
 
       if header == 'Filetype':
         if payload != HEADER_IBTN:
-          print(f"Некорректный заголовок файла:\n{file_path}\n{payload}")
+          #print(f"Некорректный заголовок файла:\n{file_path}\n{payload}")
           return {}
         else:
           continue
@@ -50,23 +48,29 @@ def parser_nfc(file_path):
 
   return nfc
 
-def enum_files(paths):
+def enum_files(paths, root):
   for file in paths:
     name, ext = os_path.splitext(file['fp'])
     if ext not in ['.nfc']:
       continue
 
     nfc = parser_nfc(file['fp'])
+    if nfc == {}:
+      continue
+
+    name = name.replace(root, '')
+    nfc['filename'] = name
 
     if 'hash' not in nfc:
       continue
-
+    
     if db.search(db_row.hash == nfc['hash']):
       #print(f"Такой сигнал уже существует!")
       #print(file['fp'])
       continue
 
     if validator_nfc(nfc):
+      print(f"Filename: {name}")
       db.insert(nfc) 
     else:
       print("Какие то проблемы, к разбору:")
@@ -79,4 +83,4 @@ args = parser.parse_args()
 
 if args.target:
   files = scan_directory(args.target)
-  enum_files(files)
+  enum_files(files, args.target)
